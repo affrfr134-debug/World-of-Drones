@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Авиапарк</title>
+<meta name="theme-color" content="#12161b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#12161b;--panel:#1b2129;--line:#2c3541;--ink:#e4e9ef;--dim:#8793a1;--acc:#e8a838;--ok:#6fc28a;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;touch-action:manipulation}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{max-width:560px;margin:0 auto;padding:14px}
+.top{text-align:center}.money{font-size:38px;font-weight:700;color:var(--acc);letter-spacing:-.02em}
+.sub{font-size:14px;color:var(--dim);margin-top:2px}
+#fx{min-height:22px;font-size:13px;color:var(--ok);text-align:center;margin-top:4px}
+#go{display:block;width:180px;height:180px;margin:12px auto;border-radius:50%;border:3px solid var(--acc);background:radial-gradient(circle at 50% 40%,#2a3441,#171d24);color:var(--ink);font-size:54px;line-height:1;box-shadow:0 0 0 8px rgba(232,168,56,.08)}
+#go small{display:block;font-size:14px;color:var(--dim);margin-top:6px}#go:active{transform:scale(.96)}
+.pop{position:fixed;pointer-events:none;font-weight:700;color:var(--acc);animation:up .8s ease-out forwards}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+.tabs{display:flex;gap:6px;margin:6px 0 10px}
+.tabs button,.qty button,.btn{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--dim);padding:11px;font-size:15px}
+.tabs button{flex:1;padding:10px 2px;font-size:13px}.tabs button.on{color:var(--ink);border-color:var(--acc)}
+.qty{display:flex;gap:6px;margin-bottom:10px}.qty button{flex:1;padding:8px;background:none;font-size:14px}.qty button.on{color:var(--acc);border-color:var(--acc)}
+.th{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:16px 2px 8px}
+.item{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:8px;color:var(--ink);font:inherit}
+.item:disabled{opacity:.45}.item:not(:disabled):active{border-color:var(--ok)}
+.ic{font-size:28px;width:36px;text-align:center}.nm{font-size:16px;font-weight:600}.ds{font-size:13px;color:var(--dim);margin-top:2px}
+.pr{margin-left:auto;text-align:right;font-size:15px;font-weight:600;color:var(--ok);white-space:nowrap}
+.pr i{display:block;font-style:normal;font-size:12px;color:var(--dim);font-weight:400}
+.hide{display:none}.note{font-size:13px;color:var(--dim);line-height:1.5;margin:6px 2px 12px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:12px;color:var(--dim)}
+.foot button{background:none;border:1px solid var(--line);border-radius:6px;color:var(--dim);padding:6px 10px;font:inherit;font-size:12px}
+#toast{position:fixed;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0));max-width:536px;margin:auto;background:var(--panel);border:1px solid var(--acc);border-radius:10px;padding:12px;text-align:center;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:60}
+#toast.on{opacity:1}
+#ov{position:fixed;inset:0;background:#000;z-index:50;display:none;overflow:auto;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}#ov.on{display:block}
+.blk{height:100vh;display:flex;align-items:center;justify-content:center;color:#444;font-size:20px}
+.box{max-width:440px;margin:0 auto;padding:18px;text-align:center}
+.box h2{font-weight:400;margin:10px 0}.box .btn{display:block;width:100%;margin:10px 0;color:var(--ink);padding:16px}
+.bd{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,400px);margin:10px auto;border:2px solid #444}
+.sq{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:min(8.4vw,34px);line-height:1}
+.sq.l{background:#b9a888}.sq.d{background:#6d5a43}.sq.s{background:#c9b037!important}.sq.t{box-shadow:inset 0 0 0 4px rgba(70,160,90,.8)}
+.w{color:#fff;text-shadow:0 0 2px #000,0 0 2px #000}.k{color:#111}
+.wg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;width:min(100%,300px);margin:10px auto}
+.wc{aspect-ratio:1;border:2px solid #333;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;text-transform:uppercase;color:#fff}
+.wc.g{background:#3f8a55;border-color:#3f8a55}.wc.y{background:#b0922f;border-color:#b0922f}.wc.n{background:#333}
+.kr{display:flex;gap:3px;justify-content:center;margin:4px 0}
+.kr button{flex:1;min-width:0;padding:12px 0;border:0;border-radius:5px;background:#444;color:#fff;font:inherit;font-size:15px;text-transform:uppercase}
+#fc{display:block;width:min(100%,320px);margin:10px auto;border:2px solid #444;border-radius:6px;touch-action:none}
+.kr button.g{background:#3f8a55}.kr button.y{background:#b0922f}.kr button.n{background:#1d1d1d;color:#777}
+.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--line);font-size:16px;color:var(--ink)}.set input[type=range]{width:55%}.set input[type=checkbox]{width:24px;height:24px}
+select,input[type=number]{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px;font:inherit;font-size:15px;color:var(--ink);margin-bottom:8px}.lb{display:block;font-size:13px;color:var(--dim);margin:10px 0 4px}
+</style></head><body>
+<main>
+<div class="top"><div class="money" id="money"></div><div class="sub" id="cps"></div></div>
+<div id="fx"></div>
+<button id="go">🛫<small id="cv"></small></button>
+<div class="tabs"><button id="t0" class="on">Парк</button><button id="t1">Улучшения</button><button id="t2">Престиж</button><button id="t3">Ангар</button><button id="t4">Фокусы</button></div>
+<div id="p0"><div class="qty" id="qty"><button data-q="1" class="on">×1</button><button data-q="10">×10</button><button data-q="0">Макс.</button></div><div id="shop"></div></div>
+<div id="p1" class="hide"></div>
+<div id="p2" class="hide"></div>
+<div id="p3" class="hide"><div class="note">Солярка стоит денег, а один литр даёт один взлёт. Пролетай между трубами: чем больше счёт, тем сильнее и дольше буст дохода, плюс деньги сразу. Ноль труб значит, что топливо сгорело зря.</div>
+<button class="item" id="fb1"><span class="ic">⛽</span><span><div class="nm">Купить 1 л солярки</div><div class="ds" id="fst"></div></span><span class="pr" id="fp1"></span></button>
+<button class="item" id="fb5"><span class="ic">🛢️</span><span><div class="nm">Купить 5 л солярки</div><div class="ds">Оптом, цена та же за литр</div></span><span class="pr" id="fp5"></span></button>
+<button class="item" id="fgo"><span class="ic">🛩️</span><span><div class="nm">Взлёт</div><div class="ds">Тратит 1 л солярки</div></span><span class="pr">1 л</span></button>
+<hr style="border:0;border-top:1px solid var(--line);margin:22px 0 14px">
+<div class="th" style="margin-top:0">Апгрейдер</div>
+<div class="note">Закинь дронов и выбери, кого хочешь получить. Чем ближе общая цена закинутых к цене цели, тем выше шанс (максимум 90%). Если не повезло, закинутые дроны сгорают. Дроны из более высокого тира получить нельзя: только из того же тира или ниже.</div>
+<label class="lb">Что закинуть</label><select id="upi"></select>
+<label class="lb">Сколько штук</label><input id="upn" type="number" inputmode="numeric" min="1" value="1">
+<label class="lb">Что получить</label><select id="upt"></select>
+<div class="note" id="upc" style="color:var(--ok)"></div>
+<button class="item" id="upgo"><span class="ic">🔧</span><span><div class="nm">Запустить апгрейд</div><div class="ds">Решает случай</div></span></button>
+<div class="note" id="upr"></div></div>
+<div id="p4" class="hide"></div>
+<div class="foot"><span id="st"></span><span><button id="cfg">⚙️ Настройки</button> <button id="reset">Сбросить игру</button></span></div>
+</main>
+<div id="cn" style="position:fixed;left:0;top:0;width:72px;height:72px;z-index:5"></div><div id="toast"></div><div id="ov"></div>
+<script>
+const $=id=>document.getElementById(id),KEY="avia-park-v2",R=1.15;
+const TI=[
+ {id:0,n:"Нейтрал",pp:0,u:[["Мини-квадрокоптер","🪁",15,.1],["Квадрокоптер","🚁",100,1],["FPV-дрон","🎯",1100,8],["Дрон самолётного типа","✈️",12000,47],["Дрон-курьер","📦",2.4e4,100],["Агродрон","🌾",4.8e4,190],["Картограф","🗺️",9e4,350]]},
+ {id:1,n:"РФ",pp:1,u:[["Герань-2","🛩️",1.3e5],["Орион","🛰️",1.4e6],["Герань-3","🚀",2e7],["Охотник","🦅",3.3e8]]},
+ {id:5,n:"Украина",pp:2,u:[["Лютый","🦅",6e8],["Бобёр","🦫",1.2e9],["Пунишер","⚙️",2.4e9],["Морской малыш","🌊",4.4e9]]},
+ {id:2,n:"США",pp:4,u:[["MQ-1 Predator","🛩️",5.1e9],["MQ-9 Reaper","☠️",7.5e10],["RQ-4 Global Hawk","🦅",1.2e12],["X-47B","🛸",2e13]]},
+ {id:6,n:"Турция",pp:6,u:[["Байрактар TB2","🛩️",5e13],["Акынджи","🛰️",9e13],["Анка","✈️",1.6e14],["Кызылельма","🚀",2.6e14]]},
+ {id:3,n:"Европа",pp:9,u:[["Watchkeeper","⚙️",3.3e14],["nEUROn","🛸",5.1e15],["Eurodrone","🛰️",8e16],["Taranis","🚀",1.4e18]]},
+ {id:7,n:"Израиль",pp:11,u:[["Херон","🦅",3e18],["Хароп","🎯",5.5e18],["Гермес","🛰️",9e18],["Орбитер","🛸",1.5e19]]},
+ {id:8,n:"Индия",pp:14,u:[["Рустом-2","🛩️",4e19],["Нишант","🐘",8e19],["Гхатак","🐅",1.5e20],["Арчер","🏹",2.5e20]]},
+ {id:9,n:"Япония",pp:17,u:[["Ямаха RMAX","🚁",5e20],["Сотэн","🌸",1e21],["Продрон","⚙️",1.9e21],["Кагэ","🥷",3.2e21]]},
+ {id:10,n:"Южная Корея",pp:21,u:[["KUS-FS","🛩️",6e21],["KUS-VH","🚁",1.2e22],["Рэйвен","🐦",2.2e22],["Хэдаль","🌙",3.8e22]]},
+ {id:4,n:"Китай",pp:26,u:[["Wing Loong II","🐉",7e22],["CH-4 Rainbow","🌈",4e23],["CH-5","🛰️",2.3e24],["GJ-11","🛸",1.3e25]]},
+ {id:21,n:"Pan Spatial",pp:40,u:[["RAMSTORM 4","🌊",2e25],["Jacknife","✈️",3.5e25],["Dragon Wing","🐲",5.5e25],["Nautilos","🔱",8e25]]},
+ {id:20,n:"Утиный синдикат",pp:60,u:[["Археоптерикс","🦖",1e26],["Вегавис","🦴",1.5e28],["Каменная утка","🪨",2.2e30],["Кряква-разведчик","🦆",3.4e32],["Современная утка","🦆",5e34],["Великая Утка","👑",7.6e37]]}
+];
+TI.forEach(t=>t.u.forEach((d,j)=>{if(d.length<4)d.push(d[2]/(150+50*j))}));
+const tl=t=>t.id==20?20:TI.indexOf(t);
+const hid=t=>(t.id==20&&!S.duck&&!S.nat.includes(20))||(t.id==21&&!S.pan&&!S.nat.includes(21));
+const U=[
+ ["Усиленная кнопка","Вылет даёт ×2",400,"c",2],["Диспетчерская","Вылет даёт ×3",6000,"c",3],
+ ["Наземный пункт управления","Весь доход ×1.25",2500,"a",1.25],["Запас запчастей","Весь доход ×1.5",40000,"a",1.5],
+ ["Свой полигон","Вылет даёт ×5",250000,"c",5],["Автоматизация миссий","Весь доход ×2",600000,"a",2],
+ ["Контракты на годы","Весь доход ×3",8e6,"a",3]
+];
+const EV=[["Попутный ветер",60,2,"попутный ветер, доход ×2 на минуту"],["Золотой заказ",20,3,"золотой заказ, доход ×3 на 20 секунд"],
+ ["Сбой связи",30,.5,"сбой связи, доход ×0.5 на 30 секунд"],["Спонсор",0,0,"спонсор принёс 5 минут дохода"],
+ ["Утиная миграция",45,2.5,"утиная миграция, доход ×2.5 на 45 секунд",1]];
+const FB=[{id:"h",n:"Штаб",nat:0},{id:"r",n:"РФ",nat:1},{id:"y",n:"Украина",nat:5},{id:"u",n:"США",nat:2},{id:"t",n:"Турция",nat:6},{id:"e",n:"Европа",nat:3},{id:"i",n:"Израиль",nat:7},{id:"n",n:"Индия",nat:8},{id:"j",n:"Япония",nat:9},{id:"s",n:"Южная Корея",nat:10},{id:"c",n:"Китай",nat:4},{id:"p",n:"Pan Spatial",nat:21},{id:"d",n:"Утиный синдикат",nat:20}];
+/* фокус: [id, ветка, название, описание, цена, секунд, [требует], задание [стат, сколько, текст] или null, эффект, [закрывает]] */
+const FO=[
+["h1","h","Первый ангар","Весь доход ×1.1",500,30,[],null,{a:1.1}],
+["h2","h","Мастерская","Дроны дешевле на 5%",5e3,60,["h1"],null,{d:.95}],
+["h3","h","Склад запчастей","Доход за тап ×2",3e4,90,["h1"],["k",300,"сделать 300 вылетов"],{c:2}],
+["h4","h","Ночные смены","Офлайн-доход копится ещё 4 часа",3e5,120,["h2"],null,{o:4}],
+["h5","h","Лётная школа","Солярка дешевле на 25%",1e6,120,["h3"],["best",10,"набрать 10 в флаппи"],{f:.75}],
+["h6","h","Единый центр","Весь доход ×1.5",2e7,300,["h4","h5"],["tot",1e9,"заработать за всё время 1 млрд"],{a:1.5}],
+["h7","h","Дежурная смена","Офлайн-доход копится ещё 6 часов",1e6,120,["h4"],null,{o:6},["h8"]],
+["h8","h","Автоматика","Офлайн-доход ×0.65 вместо ×0.5",1e6,120,["h4"],null,{oq:.15},["h7"]],
+["h9","h","Ставка на клики","Доход за тап ×3",5e7,240,["h6"],null,{c:3},["h10"]],
+["h10","h","Ставка на парк","Весь доход ×1.25",5e7,240,["h6"],null,{a:1.25},["h9"]],
+["h11","h","Сертификат лётной годности","Доход нейтральных дронов ×1.5",2e5,90,["h2"],null,{tm:[0,1.5]}],
+["h12","h","Сеть доставки","Доход нейтральных дронов ×2",5e6,200,["h11"],["k",1500,"сделать 1500 вылетов"],{tm:[0,2]}],
+["h13","h","Агрокооператив","Весь доход ×1.2",3e7,240,["h12"],["tot",5e9,"заработать за всё время 5 млрд"],{a:1.2}],
+["r1","r","Серийное производство","Доход тира РФ ×1.5",2e6,120,[],null,{tm:[1,1.5]}],
+["r2","r","Тыловые мастерские","Дроны дешевле на 5%",3e7,180,["r1"],["k",2000,"сделать 2000 вылетов"],{d:.95}],
+["r3","r","Экспортный контракт","Доход тира РФ ×2 и весь доход ×1.1",4e8,300,["r2"],["tot",1e10,"заработать за всё время 10 млрд"],{tm:[1,2],a:1.1}],
+["y1","y","Народная инициатива","Доход тира Украины ×1.5",3e8,150,[],null,{tm:[5,1.5]}],
+["y2","y","Волонтёрские мастерские","Дроны дешевле на 5% и весь доход ×1.1",3e9,210,["y1"],["k",3000,"сделать 3000 вылетов"],{d:.95,a:1.1}],
+["y3","y","Рой Бобров","Доход тира Украины ×2",4e10,330,["y2"],["best",12,"набрать 12 в флаппи"],{tm:[5,2]}],
+["u1","u","Оборонный подряд","Доход тира США ×1.5",2e8,150,[],null,{tm:[2,1.5]}],
+["u2","u","Венчурный фонд","Весь доход ×1.25",4e9,240,["u1"],["best",15,"набрать 15 в флаппи"],{a:1.25}],
+["u3","u","Лоббисты","Престижа за ребёрт на 25% больше",6e10,360,["u2"],["life",6,"накопить 6 престижа за всё время"],{p:1.25}],
+["t1","t","Оборонная промышленность","Доход тира Турции ×1.5",2e13,180,[],null,{tm:[6,1.5]}],
+["t2","t","Экспортные рынки","Весь доход ×1.2",3e14,300,["t1"],["best",18,"набрать 18 в флаппи"],{a:1.2}],
+["t3","t","Национальная программа","Доход тира Турции ×2 и дроны дешевле на 5%",4e15,420,["t2"],["life",8,"накопить 8 престижа за всё время"],{tm:[6,2],d:.95}],
+["e1","e","Общий рынок","Доход тира Европы ×1.5",2e11,180,[],null,{tm:[3,1.5]}],
+["e2","e","Научный консорциум","Весь доход ×1.25",3e12,300,["e1"],["best",20,"набрать 20 в флаппи"],{a:1.25}],
+["e3","e","Евростандарт","Дроны дешевле на 10%",5e13,420,["e2"],["life",10,"накопить 10 престижа за всё время"],{d:.9}],
+["i1","i","Стартап-нация","Доход тира Израиля ×1.5",1e18,240,[],null,{tm:[7,1.5]}],
+["i2","i","Умные системы","Доход за тап ×2",1.5e19,360,["i1"],["tot",1e17,"заработать за всё время 100 квадрлн"],{c:2}],
+["i3","i","Железный купол","Весь доход ×1.3",2e20,480,["i2"],["best",25,"набрать 25 в флаппи"],{a:1.3}],
+["n1","n","Сделано в Индии","Доход тира Индии ×1.5",2e19,240,[],null,{tm:[8,1.5]}],
+["n2","n","Горные эскадрильи","Дроны дешевле на 5%",3e20,360,["n1"],["k",6000,"сделать 6000 вылетов"],{d:.95}],
+["n3","n","Слон и тигр","Доход тира Индии ×2 и весь доход ×1.1",4e21,480,["n2"],["life",14,"накопить 14 престижа за всё время"],{tm:[8,2],a:1.1}],
+["j1","j","Точное производство","Доход тира Японии ×1.5",2e20,240,[],null,{tm:[9,1.5]}],
+["j2","j","Роботизация","Весь доход ×1.2",3e21,360,["j1"],["best",22,"набрать 22 в флаппи"],{a:1.2}],
+["j3","j","Сезон сакуры","Доход тира Японии ×2 и офлайн копится ещё 2 часа",4e22,480,["j2"],["tot",1e19,"заработать за всё время 10 трлрд"],{tm:[9,2],o:2}],
+["s1","s","Чеболи","Доход тира Кореи ×1.5",3e21,240,[],null,{tm:[10,1.5]}],
+["s2","s","Полупроводники","Весь доход ×1.2",5e22,360,["s1"],["life",18,"накопить 18 престижа за всё время"],{a:1.2}],
+["s3","s","К-рой","Доход тира Кореи ×2 и дроны дешевле на 5%",6e23,480,["s2"],["k",15000,"сделать 15 000 вылетов"],{tm:[10,2],d:.95}],
+["c1","c","Фабрика мира","Дроны дешевле на 10%",3e22,240,[],null,{d:.9}],
+["c2","c","Рой","Доход тира Китая ×1.5",4e23,360,["c1"],["k",10000,"сделать 10 000 вылетов"],{tm:[4,1.5]}],
+["c3","c","Один пояс, один путь","Весь доход ×1.5",5e24,480,["c2"],["tot",1e15,"заработать за всё время 1 квадрлн"],{a:1.5}],
+["p1","p","Концепт-арт","Доход тира Pan Spatial ×1.5",1e24,300,[],null,{tm:[21,1.5]}],
+["p2","p","Студийный пайплайн","Весь доход ×1.3",2e25,420,["p1"],["best",28,"набрать 28 в флаппи"],{a:1.3}],
+["p3","p","Из 2050 года","Доход тира Pan Spatial ×2 и доход за тап ×3",3e26,540,["p2"],["life",30,"накопить 30 престижа за всё время"],{tm:[21,2],c:3}],
+["d1","d","Первое яйцо","Доход тира уток ×1.5",1e25,300,[],null,{tm:[20,1.5]}],
+["d2","d","Эволюция","Весь доход ×2",2e27,480,["d1"],["best",30,"набрать 30 в флаппи"],{a:2}],
+["d3","d","Яйцо Вавилона","Весь доход ×1.5 и престижа за ребёрт ×1.5",3e29,600,["d2"],["life",40,"накопить 40 престижа за всё время"],{a:1.5,p:1.5}]
+];
+const fdone=id=>S.fd.includes(id);
+const fMul=k=>FO.reduce((m,f)=>fdone(f[0])&&f[8][k]?m*f[8][k]:m,1);
+const tierM=t=>FO.reduce((m,f)=>fdone(f[0])&&f[8].tm&&f[8].tm[0]==t?m*f[8].tm[1]:m,1);
+const offH=()=>8+FO.reduce((h,f)=>fdone(f[0])&&f[8].o?h+f[8].o:h,0);
+const offQ=()=>.5+FO.reduce((q,f)=>fdone(f[0])&&f[8].oq?q+f[8].oq:q,0);
+const fresh=()=>({vol:1,vibT:0,vibB:1,fd:[],fa:null,best:0,wins:0,fuel:0,m:0,tot:0,run:0,k:0,own:{},up:U.map(()=>0),pp:0,life:0,nat:[0],fx:[],t:Date.now()});
+let rbArm=0,rsArm=0,S=fresh(),qty=1,UB=[],nextEv=Date.now()+150000;
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.own)S={...S,...s}}catch(e){}
+if(S.up.length!=U.length)S.up=U.map((_,i)=>S.up[i]||0);
+
+function fmt(n){if(n<1000)return n<10?n.toFixed(1).replace(/\.0$/,""):Math.floor(n).toString();
+ const u=["","тыс.","млн","млрд","трлн","квадрлн","квинтлн","секстлн","септлн","октлн","нонлн","децлн"];
+ if(n>=1e36)return n.toExponential(2).replace("e+","e");let i=0;while(n>=1000){n/=1000;i++}
+ return n.toFixed(n<10?2:n<100?1:0).replace(/\.0+$/,"")+" "+u[i]}
+const m$=n=>fmt(n)+" ₽";
+const mile=n=>{let k=1;for(const t of[10,25,50,100,200])if(n>=t)k*=2;return k};
+const aM=()=>U.reduce((k,u,i)=>k*(S.up[i]&&u[3]=="a"?u[4]:1),1)*fMul("a");
+const cM=()=>U.reduce((k,u,i)=>k*(S.up[i]&&u[3]=="c"?u[4]:1),1)*fMul("c");
+const pM=()=>1+.1*S.life;
+function fxM(){const n=Date.now();S.fx=S.fx.filter(f=>f.until>n);return S.fx.reduce((k,f)=>k*f.m,1)}
+function cps0(){let s=0;TI.forEach(t=>{if(S.nat.includes(t.id))t.u.forEach((d,i)=>{const o=S.own[t.id+"-"+i]||0;s+=o*d[3]*mile(o)*tierM(t.id)})});return s*aM()*pM()}
+const cps=()=>cps0()*fxM();
+const fxC=()=>S.fx.reduce((k,f)=>f.until>Date.now()?k*(f.c||1):k,1);
+const clickVal=()=>(1+cps0()*.02)*cM()*fxC();
+const own=k=>S.own[k]||0;
+const cost=(d,k,n)=>d[2]*fMul("d")*Math.pow(R,own(k))*(Math.pow(R,n)-1)/(R-1);
+const maxN=(d,k)=>Math.max(0,Math.floor(Math.log(1+S.m*(R-1)/(d[2]*fMul("d")*Math.pow(R,own(k))))/Math.log(R)));
+const n4=(d,k)=>qty==0?Math.max(1,maxN(d,k)):qty;
+const gain=()=>Math.floor(Math.sqrt(S.run/3e6)*fMul("p"));
+function earn(g){S.m+=g;S.tot+=g;S.run+=g}
+
+function buildShop(){
+ const sh=$("shop");sh.innerHTML="";UB=[];
+ TI.forEach(t=>{if(hid(t))return;const h=document.createElement("div");h.className="th";
+  if(!S.nat.includes(t.id)){h.textContent="🔒 "+t.n+" — откроется за "+t.pp+" престижа";sh.append(h);return}
+  h.textContent=t.id==0?"Нейтрал":"Тир "+tl(t)+" · "+t.n;sh.append(h);
+  t.u.forEach((d,i)=>{const k=t.id+"-"+i,b=document.createElement("button");b.className="item";
+   b.innerHTML=`<span class="ic">${d[1]}</span><span><div class="nm"></div><div class="ds"></div></span><span class="pr"></span>`;
+   b.onclick=()=>{const n=n4(d,k),c=cost(d,k,n);if(S.m>=c){S.m-=c;S.own[k]=own(k)+n;snd("buy");upd()}};
+   UB.push({k,d,b});sh.append(b)})})}
+const up=$("p1");
+U.forEach((u,i)=>{const b=document.createElement("button");b.className="item";b.id="u"+i;
+ b.innerHTML=`<span class="ic">⚙️</span><span><div class="nm">${u[0]}</div><div class="ds">${u[1]}</div></span><span class="pr"></span>`;
+ b.onclick=()=>{if(!S.up[i]&&S.m>=u[2]){S.m-=u[2];S.up[i]=1;snd("up");upd()}};up.append(b)});
+function buildPres(){
+ const p=$("p2");p.innerHTML=`<div class="note">Ребёрт обнуляет деньги, парк и улучшения, но даёт престиж. Каждое очко престижа навсегда добавляет +10% к доходу, а ещё им открывают нации. Открытые нации остаются навсегда, и качать можно все сразу.</div>
+ <button class="item" id="rb"><span class="ic">♻️</span><span><div class="nm">Ребёрт</div><div class="ds" id="rbd"></div></span><span class="pr" id="rbp"></span></button>`;
+ TI.slice(1).forEach(t=>{const b=document.createElement("button");b.className="item";b.id="n"+t.id;
+  b.innerHTML=`<span class="ic">🏳️</span><span><div class="nm">Тир ${tl(t)} · ${t.n}</div><div class="ds">${t.u.map(d=>d[0]).join(", ")}</div></span><span class="pr"></span>`;
+  b.onclick=()=>{if(!S.nat.includes(t.id)&&S.pp>=t.pp){S.pp-=t.pp;S.nat.push(t.id);snd("up");buildShop();buildFocus();upd();toast("Открыта нация: "+t.n)}};p.append(b)});
+ $("rb").onclick=()=>{const g=gain();if(g<1)return;if(Date.now()-rbArm>5000){rbArm=Date.now();toast("Ребёрт даст +"+g+" престижа, но обнулит деньги, парк и улучшения. Нажми «Ребёрт» ещё раз в течение 5 секунд.");return}rbArm=0;
+  S.pp+=g;S.life+=g;S.m=0;S.run=0;S.own={};S.up=U.map(()=>0);S.fx=[];snd("rebirth");buildShop();upd();toast("Ребёрт! Престиж +"+g)}}
+function upd(){
+ $("money").textContent=m$(S.m);$("cps").textContent="Доход: "+m$(cps())+" в секунду"+(S.life?" · престиж ×"+pM().toFixed(1):"");
+ $("cv").textContent="+"+m$(clickVal());
+ UB.forEach(({k,d,b})=>{const n=n4(d,k),c=cost(d,k,n),mk=mile(own(k));
+  b.querySelector(".nm").textContent=d[0]+(own(k)?" · "+own(k):"");
+  b.querySelector(".ds").textContent=m$(d[3]*mk*aM()*pM()*tierM(+k.split("-")[0]))+"/с каждый"+(mk>1?" (×"+mk+")":"");
+  b.querySelector(".pr").innerHTML=m$(c)+"<i>купить ×"+n+"</i>";b.disabled=S.m<c});
+ U.forEach((u,i)=>{const b=$("u"+i);b.querySelector(".pr").innerHTML=S.up[i]?"Куплено":m$(u[2]);b.disabled=!!S.up[i]||S.m<u[2];b.style.opacity=S.up[i]?.5:""});
+ const g=gain();$("rbd").textContent="Престиж сейчас: "+S.pp+" · за всё время: "+S.life;$("rbp").innerHTML=g>=1?"+"+g+"<i>получить</i>":"нужно ещё<i>"+m$(Math.max(0,3e6-S.run))+"</i>";$("rb").disabled=g<1;
+ TI.slice(1).forEach(t=>{const b=$("n"+t.id),has=S.nat.includes(t.id);b.classList.toggle("hide",hid(t));b.querySelector(".pr").innerHTML=has?"Открыто":t.pp+" престижа";b.disabled=has||S.pp<t.pp;b.style.opacity=has?.5:""});
+ $("fx").textContent=S.fx.map(f=>f.k+" ("+(f.c?"доход ×"+f.m+", тап ×"+f.c:"×"+f.m)+", "+Math.ceil((f.until-Date.now())/1000)+" с)").join(" · ");
+ updF();updFocus();$("st").textContent="Вылетов: "+S.k+" · за ребёрт "+m$(S.run)}
+
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),3500)}
+function fire(){const pool=EV.filter(e=>!e[4]||S.nat.includes(20)),e=pool[Math.random()*pool.length|0];
+ if(e[1]==0)earn(cps()*300);else S.fx.push({k:e[0],m:e[2],until:Date.now()+e[1]*1000});snd(e[1]&&e[2]<1?"bad":"event");toast("Событие: "+e[3])}
+
+$("go").addEventListener("pointerdown",e=>{
+ snd("tap");const v=clickVal();earn(v);S.k++;upd();
+ const p=document.createElement("div");p.className="pop";p.textContent="+"+fmt(v);
+ p.style.left=(e.clientX-14)+"px";p.style.top=(e.clientY-30)+"px";document.body.append(p);setTimeout(()=>p.remove(),800);
+ if(!$("ov").classList.contains("on")&&Math.random()<.00005&&Date.now()-(S.sec||0)>432e5){S.sec=Date.now();secret()}});
+$("qty").onclick=e=>{const q=e.target.dataset.q;if(q==null)return;qty=+q;[...$("qty").children].forEach(b=>b.classList.toggle("on",b.dataset.q==q));upd()};
+[0,1,2,3,4].forEach(i=>$("t"+i).onclick=()=>[0,1,2,3,4].forEach(j=>{$("t"+j).classList.toggle("on",i==j);$("p"+j).classList.toggle("hide",i!=j)}));
+$("reset").onclick=()=>{if(Date.now()-rsArm>5000){rsArm=Date.now();toast("Это удалит весь прогресс, включая престиж. Нажми «Сбросить игру» ещё раз в течение 5 секунд.");return}rsArm=0;try{localStorage.removeItem(KEY)}catch(e){}S=fresh();buildShop();buildFocus();upd()};
+
+$("cn").addEventListener("pointerdown",()=>{
+ S.cn=(S.cn||0)+1;
+ if(S.cn>=30&&!S.duck){S.duck=true;snd("quack");buildShop();upd();toast("Что-то крякнуло… Во вкладке «Престиж» появился новый тир.")}});
+
+/* ---------- апгрейдер ---------- */
+function unitList(){const L=[];TI.forEach(t=>{if(!S.nat.includes(t.id))return;t.u.forEach((d,i)=>L.push({k:t.id+"-"+i,t,d,pos:TI.indexOf(t)}))});return L}
+function upgRefresh(){
+ const L=unitList(),si=$("upi"),pi=si.value;
+ si.innerHTML=L.filter(u=>own(u.k)>0).map(u=>`<option value="${u.k}">${u.d[0]} (у тебя ${own(u.k)})</option>`).join("")||'<option value="">нет дронов</option>';
+ if([...si.options].some(o=>o.value==pi))si.value=pi;
+ upgTargets($("upt").value)}
+function upgTargets(pt){
+ const L=unitList(),a=L.find(u=>u.k==$("upi").value),st=$("upt");
+ st.innerHTML=a?L.filter(u=>u.pos<=a.pos&&u.k!=a.k&&u.d[2]>a.d[2]).map(u=>`<option value="${u.k}">${u.d[0]} (${u.t.n})</option>`).join(""):"";
+ if(!st.options.length)st.innerHTML='<option value="">нет подходящих целей</option>';
+ else if([...st.options].some(o=>o.value==pt))st.value=pt;
+ upgCalc()}
+function upgState(){
+ const L=unitList(),a=L.find(u=>u.k==$("upi").value),g=L.find(u=>u.k==$("upt").value);
+ if(!a||!g)return null;
+ const n=Math.max(1,Math.min(own(a.k),parseInt($("upn").value)||1)),ch=Math.max(.01,Math.min(.9,n*a.d[2]/g.d[2]*.9));
+ return{a,g,n,ch}}
+function upgCalc(){
+ const u=upgState();
+ if(!u){$("upc").textContent="Выбери, что закинуть и что получить.";$("upgo").disabled=true;return}
+ $("upc").textContent="Шанс получить «"+u.g.d[0]+"»: "+(u.ch*100).toFixed(u.ch<.1?1:0)+"% (закидываешь "+u.n+" шт.)";$("upgo").disabled=false}
+$("upi").onchange=()=>upgTargets("");
+$("upt").onchange=upgCalc;$("upn").oninput=upgCalc;
+$("upgo").onclick=()=>{
+ const u=upgState();if(!u)return;
+ const win=Math.random()<u.ch;
+ S.own[u.a.k]=own(u.a.k)-u.n;if(win)S.own[u.g.k]=own(u.g.k)+1;
+ snd(win?"win":"lose");
+ $("upr").textContent=win?"Апгрейд удался! Получен: "+u.g.d[0]+".":"Не повезло. Закинутые дроны ("+u.n+" шт.) сгорели.";
+ upgRefresh();upd()};
+$("t3").addEventListener("click",upgRefresh);
+upgRefresh();
+
+/* ---------- фокусы ---------- */
+const fReady=f=>f[6].every(fdone),fTask=f=>!f[7]||(S[f[7][0]]||0)>=f[7][1],fBlk=f=>(f[9]||[]).some(x=>fdone(x)||(S.fa&&S.fa.id==x));
+function buildFocus(){
+ const p=$("p4");
+ p.innerHTML='<div class="note">Фокусы остаются навсегда и не сбрасываются ребёртом. Каждый стоит рублей, а некоторым нужно выполнить задание. Одновременно изучается один фокус, и он идёт в реальном времени, даже когда игра закрыта. Некоторые фокусы идут парами: выбрав один, второй закроешь навсегда. Новые ветки появляются при открытии наций.</div><div class="note" id="fa" style="color:var(--ok)"></div>';
+ FB.forEach(b=>{if(!S.nat.includes(b.nat))return;
+  const h=document.createElement("div");h.className="th";h.textContent="Ветка · "+b.n;p.append(h);
+  FO.filter(f=>f[1]==b.id).forEach(f=>{const el=document.createElement("button");el.className="item";el.id="fo-"+f[0];
+   el.innerHTML='<span class="ic"></span><span><div class="nm"></div><div class="ds"></div></span><span class="pr"></span>';
+   el.onclick=()=>startFocus(f);p.append(el)})})}
+function startFocus(f){
+ if(S.fa||fdone(f[0])||!fReady(f)||fBlk(f)||!fTask(f)||S.m<f[4])return;
+ S.m-=f[4];S.fa={id:f[0],end:Date.now()+f[5]*1000};snd("buy");upd()}
+function doneFocus(){
+ const f=FO.find(x=>x[0]==S.fa.id);S.fd.push(S.fa.id);S.fa=null;snd("up");toast("Фокус изучен: "+f[2])}
+function updFocus(){
+ if(S.fa&&Date.now()>=S.fa.end)doneFocus();
+ const fa=$("fa");
+ if(fa){const a=S.fa&&FO.find(f=>f[0]==S.fa.id);fa.textContent=a?"Изучается: "+a[2]+" · осталось "+Math.ceil((S.fa.end-Date.now())/1000)+" с":""}
+ FO.forEach(f=>{const el=$("fo-"+f[0]);if(!el)return;
+  const done=fdone(f[0]),act=!!S.fa&&S.fa.id==f[0],rd=fReady(f);
+  const ic=el.querySelector(".ic"),nm=el.querySelector(".nm"),ds=el.querySelector(".ds"),pr=el.querySelector(".pr");
+  if(!rd&&!done){ic.textContent="🔒";nm.textContent="???";ds.textContent="Сначала изучи предыдущий фокус";pr.textContent="";el.disabled=true;return}
+  if(fBlk(f)&&!done&&!act){ic.textContent="🚫";nm.textContent=f[2];ds.textContent="Закрыто: выбран другой путь";pr.textContent="";el.disabled=true;el.style.opacity=.35;return}
+  ic.textContent=done?"✅":act?"⏳":"🎯";nm.textContent=f[2];
+  let t=f[3]+(f[9]&&!done?" · Выбор: другой путь закроется":"");if(f[7]&&!done){t+=" · Задание: "+f[7][2]+" ("+fmt(Math.min(f[7][1],Math.floor(S[f[7][0]]||0)))+" из "+fmt(f[7][1])+")"}
+  ds.textContent=t;pr.innerHTML=done?"Готово":act?"Идёт…":m$(f[4])+"<i>"+f[5]+" с</i>";
+  el.disabled=done||act||!!S.fa||S.m<f[4]||!fTask(f);el.style.opacity=done?.55:""})}
+
+/* ---------- звуки (синтез, без файлов) ---------- */
+let AC=null;
+function snd(t){
+ vib(t);
+ if(S.mute||S.vol<=0)return;
+ try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state=="suspended")AC.resume()}catch(e){return}
+ const n=AC.currentTime;
+ const tone=(f,d,ty,v,at,f2)=>{const o=AC.createOscillator(),g=AC.createGain();at=at||0;o.type=ty||"sine";
+  o.frequency.setValueAtTime(f,n+at);if(f2)o.frequency.exponentialRampToValueAtTime(f2,n+at+d);
+  g.gain.setValueAtTime((v||.1)*S.vol,n+at);g.gain.exponentialRampToValueAtTime(.0001,n+at+d);
+  o.connect(g);g.connect(AC.destination);o.start(n+at);o.stop(n+at+d+.03)};
+ const arp=(fs,ty,gap)=>fs.forEach((f,i)=>tone(f,.18,ty,.09,i*(gap||.09)));
+ const K={
+  tap:()=>tone(500,.06,"triangle",.08,0,320),
+  buy:()=>{tone(440,.07,"square",.05);tone(660,.09,"square",.05,.06)},
+  up:()=>arp([523,659,784],"sine"),
+  event:()=>{tone(880,.12,"sine",.09);tone(1175,.18,"sine",.09,.12)},
+  bad:()=>{tone(330,.2,"sawtooth",.07,0,220);tone(220,.25,"sawtooth",.07,.18,150)},
+  rebirth:()=>tone(200,.7,"sawtooth",.06,0,900),
+  dark:()=>tone(140,.9,"sawtooth",.1,0,35),
+  win:()=>arp([523,659,784,1047],"triangle",.1),
+  lose:()=>tone(330,.5,"sawtooth",.08,0,140),
+  flap:()=>tone(420,.08,"square",.045,0,650),
+  score:()=>tone(900,.07,"sine",.09),
+  crash:()=>tone(160,.3,"sawtooth",.12,0,50),
+  move:()=>tone(300,.05,"triangle",.1,0,190),
+  key:()=>tone(700,.04,"square",.035),
+  quack:()=>{tone(620,.12,"sawtooth",.07,0,320);tone(560,.14,"sawtooth",.07,.16,280)}
+ };
+ (K[t]||(()=>{}))()}
+const VB={tap:8,flap:8,key:8,move:12,buy:25,up:[40,30,40],event:40,bad:[70,40,70],rebirth:[60,40,120],dark:200,win:[40,40,40,40,80],lose:120,crash:150,score:15,quack:[30,30,30]};
+function vib(t){const q=VB[t];if(!q||!navigator.vibrate)return;
+ const tp=t=="tap"||t=="flap"||t=="key"||t=="move";if(tp?!S.vibT:!S.vibB)return;try{navigator.vibrate(q)}catch(e){}}
+function settings(){
+ if(ov.classList.contains("on"))return;
+ ov.classList.add("on");
+ ov.innerHTML=`<div class="box" style="text-align:left"><h2 style="text-align:center">Настройки</h2>
+ <label class="set">Звук <input type="checkbox" id="sm" ${S.mute?"":"checked"}></label>
+ <label class="set">Громкость <input type="range" id="sv" min="0" max="100" value="${Math.round(S.vol*100)}"></label>
+ <label class="set">Вибрация при тапах и ходах <input type="checkbox" id="vt" ${S.vibT?"checked":""}></label>
+ <label class="set">Вибрация при покупках и событиях <input type="checkbox" id="vb" ${S.vibB?"checked":""}></label>
+ <div class="note">${navigator.vibrate?"Вибрация зависит от телефона и от приложения, где открыта игра.":"Здесь вибрация недоступна: приложение или браузер её не поддерживают."}</div>
+ <label class="lb" style="margin-top:14px">Промокод</label><div style="display:flex;gap:8px"><input id="pc" type="text" autocomplete="off" autocapitalize="characters" placeholder="Введи код" style="flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:11px;font:inherit;font-size:15px;color:var(--ink)"><button class="btn" id="pa" style="width:auto;margin:0;padding:10px 16px">Применить</button></div><div class="note" id="pm"></div>
+ <button class="btn" id="cl">Готово</button></div>`;
+ $("sm").onchange=e=>{S.mute=!e.target.checked;if(!S.mute)snd("buy")};
+ $("sv").oninput=e=>{S.vol=e.target.value/100};
+ $("sv").onchange=()=>snd("buy");
+ $("vt").onchange=e=>{S.vibT=e.target.checked?1:0;if(S.vibT&&navigator.vibrate)navigator.vibrate(40)};
+ $("vb").onchange=e=>{S.vibB=e.target.checked?1:0;if(S.vibB&&navigator.vibrate)navigator.vibrate(40)};
+ $("pa").onclick=applyPromo;
+ $("cl").onclick=()=>{ov.classList.remove("on");ov.innerHTML="";save()}}
+/* ---------- промокоды ---------- */
+const PROMO={
+ MAYDREAMSCOMETRUE:()=>{if(S.pan)return"Этот код уже активирован.";S.pan=true;buildShop();upd();snd("up");return"Код принят. Во вкладке «Престиж» появился новый тир."}
+};
+function applyPromo(){
+ const c=$("pc").value.trim().toUpperCase().replace(/\s+/g,""),f=PROMO[c];
+ $("pm").textContent=f?f():"Такого кода нет.";if(f)$("pc").value=""}
+
+$("cfg").onclick=settings;
+
+/* ---------- солярка и полёт ---------- */
+const fp=()=>Math.max(50,Math.round(cps()*60*fMul("f")));
+function updF(){const p=fp();$("fst").textContent="В баке: "+(S.fuel||0)+" л";
+ $("fp1").textContent=m$(p);$("fp5").textContent=m$(p*5);
+ $("fb1").disabled=S.m<p;$("fb5").disabled=S.m<p*5;$("fgo").disabled=!(S.fuel>0)||ov.classList.contains("on")}
+$("fb1").onclick=()=>{const p=fp();if(S.m>=p){S.m-=p;S.fuel=(S.fuel||0)+1;upd()}};
+$("fb5").onclick=()=>{const p=fp()*5;if(S.m>=p){S.m-=p;S.fuel=(S.fuel||0)+5;upd()}};
+$("fgo").onclick=()=>{if(S.fuel>0&&!ov.classList.contains("on")){S.fuel--;upd();flappy()}};
+function flyEnd(sc){S.best=Math.max(S.best||0,sc);
+ const m=Math.min(8,1+sc*.25),sec=30+sc*6,g=cps()*sc*20;
+ if(sc>0){earn(g);S.fx.push({k:"Топливный рывок",m:+m.toFixed(2),until:Date.now()+sec*1000})}
+ ov.innerHTML=`<div class="box"><h2>Счёт: ${sc}</h2><div class="note">${sc?"Доход ×"+m.toFixed(2)+" на "+sec+" с и "+m$(g)+" сразу":"Ни одной трубы. Топливо сгорело зря."}</div><button class="btn" id="ok">Продолжить</button></div>`;
+ $("ok").onclick=()=>{ov.classList.remove("on");ov.innerHTML="";upd()}}
+function flappy(){
+ ov.classList.add("on");
+ ov.innerHTML='<div class="box"><h2>Взлёт!</h2><canvas id="fc" width="320" height="480"></canvas><div class="note">Тапай по экрану, чтобы держаться в воздухе, и пролетай между трубами.</div></div>';
+ const c=$("fc"),x=c.getContext("2d");
+ let y=240,v=0,sc=0,pipes=[],go=false,dead=false,last=performance.now();
+ const GAP=135,PW=54,BX=80;
+ c.addEventListener("pointerdown",e=>{e.preventDefault();if(dead)return;go=true;v=-5.4;snd("flap")});
+ function die(){if(dead)return;dead=true;snd("crash");setTimeout(()=>flyEnd(sc),700)}
+ function loop(now){
+  const dt=Math.min(2,(now-last)/16.67);last=now;
+  if(go&&!dead){
+   v=Math.min(6.5,v+.32*dt);y+=v*dt;
+   if(!pipes.length||pipes[pipes.length-1].x<150)pipes.push({x:330,gy:70+Math.random()*(480-GAP-140),p:false});
+   pipes.forEach(p=>{p.x-=2.3*dt;if(!p.p&&p.x+PW<BX){p.p=true;sc++;snd("score")}
+    if(BX+12>p.x&&BX-12<p.x+PW&&(y-12<p.gy||y+12>p.gy+GAP))die()});
+   pipes=pipes.filter(p=>p.x>-PW);
+   if(y<12||y>468)die()}
+  else if(!go){y=240+Math.sin(now/200)*8}
+  x.fillStyle="#0e1a2b";x.fillRect(0,0,320,480);
+  x.fillStyle="#3f6a4f";pipes.forEach(p=>{x.fillRect(p.x,0,PW,p.gy);x.fillRect(p.x,p.gy+GAP,PW,480-p.gy-GAP)});
+  x.font="26px serif";x.textAlign="center";x.textBaseline="middle";x.fillText("🛩️",BX,y);
+  x.fillStyle="#e8a838";x.font="bold 30px system-ui";x.fillText(sc,160,36);
+  if(!go){x.fillStyle="#8793a1";x.font="16px system-ui";x.fillText("Тапни, чтобы начать",160,330)}
+  if(!ov.classList.contains("on")||!$("fc"))return;
+  requestAnimationFrame(loop)}
+ requestAnimationFrame(loop)}
+
+/* ---------- секретное событие ---------- */
+const ov=$("ov");
+function finish(win){if(win)S.wins=(S.wins||0)+1;snd(win?"win":"lose");ov.classList.remove("on");ov.innerHTML="";
+ if(win){S.fx.push({k:"Секретный бонус",m:3,until:Date.now()+6e5});earn(cps()*900);toast("Свет вернулся! Доход ×3 на 10 минут и 15 минут дохода сразу")}
+ else{S.fx.push({k:"Штраф за проигрыш",m:.5,until:Date.now()+18e4});toast("Свет вернулся, но ты проиграл: доход ×0.5 на 3 минуты")}}
+function secret(){snd("dark");ov.classList.add("on");ov.innerHTML='<div class="blk">Свет вырубился…</div>';
+ setTimeout(()=>{
+  if(S.guar){S.guar=false;S.fx.push({k:"Гарант из Великобритании",m:0,c:15,until:Date.now()+12e4});
+   ov.innerHTML='<div class="box"><h2>Гарант из Великобритании сработал</h2><div class="note">Пассивный доход пропал на 2 минуты, зато тап ×15. Жми на кнопку!</div><button class="btn" id="ok">Продолжить</button></div>';
+   $("ok").onclick=()=>{ov.classList.remove("on");ov.innerHTML="";upd()};return}
+  ov.innerHTML='<div class="box"><h2>В темноте горят два экрана. Выбирай испытание.</h2><button class="btn" id="cb">♟ Победить ИИ в шахматы</button><button class="btn" id="wb">🔤 Угадать слово в вордли</button><button class="btn" id="gb">🇬🇧 Гарант из Великобритании</button><div class="note">Проигрыш в игре даёт штраф. Гарант штрафа сейчас не даёт, но при следующем блэкауте он сработает: пассивный доход пропадёт на 2 минуты, зато тап ×15.</div></div>';
+  $("cb").onclick=chess;$("wb").onclick=wordle;
+  $("gb").onclick=()=>{S.guar=true;ov.classList.remove("on");ov.innerHTML="";toast("Гарант оформлен. Свет вернулся.")}},1800)}
+function endBox(win,msg){ov.innerHTML=`<div class="box"><h2>${msg}</h2><button class="btn" id="ok">Продолжить</button></div>`;$("ok").onclick=()=>finish(win)}
+
+/* шахматы: упрощённые правила (нет рокировки и взятия на проходе, превращение только в ферзя), выигрывает тот, кто съел короля */
+const VAL={p:100,n:320,b:330,r:500,q:900,k:20000},isW=p=>p===p.toUpperCase();
+function gen(b,w){const mv=[];for(let i=0;i<64;i++){const p=b[i];if(!p||isW(p)!==w)continue;const t=p.toLowerCase(),r=i>>3,c=i&7;
+ const add=(rr,cc)=>{if(rr<0||rr>7||cc<0||cc>7)return 0;const q=b[rr*8+cc];if(q&&isW(q)===w)return 0;mv.push([i,rr*8+cc]);return q?2:1};
+ if(t=="p"){const d=w?-1:1,rr=r+d;if(rr>=0&&rr<8){if(!b[rr*8+c]){mv.push([i,rr*8+c]);if(r==(w?6:1)&&!b[(r+2*d)*8+c])mv.push([i,(r+2*d)*8+c])}
+  for(const dc of[-1,1]){const cc=c+dc;if(cc>=0&&cc<8){const q=b[rr*8+cc];if(q&&isW(q)!==w)mv.push([i,rr*8+cc])}}}}
+ else if(t=="n"||t=="k"){const ds=t=="n"?[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]:[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];for(const[x,y]of ds)add(r+x,c+y)}
+ else{const o=[[1,0],[-1,0],[0,1],[0,-1]],g=[[1,1],[1,-1],[-1,1],[-1,-1]],ds=t=="r"?o:t=="b"?g:o.concat(g);for(const[x,y]of ds){let k=1;while(add(r+x*k,c+y*k)==1)k++}}}
+ return mv}
+function app(b,m){const n=b.slice(),p=n[m[0]];n[m[0]]="";n[m[1]]=p=="P"&&m[1]<8?"Q":p=="p"&&m[1]>55?"q":p;return n}
+const ev=b=>b.reduce((s,p)=>p?s+(isW(p)?-1:1)*VAL[p.toLowerCase()]:s,0);
+function ab(b,d,al,be,blk){if(!d)return ev(b);const ms=gen(b,!blk);if(!ms.length)return 0;let best=blk?-1e9:1e9;
+ for(const m of ms){const cap=b[m[1]],v=cap&&cap.toLowerCase()=="k"?(blk?1e6:-1e6):ab(app(b,m),d-1,al,be,!blk);
+  if(blk){best=Math.max(best,v);al=Math.max(al,v)}else{best=Math.min(best,v);be=Math.min(be,v)}if(be<=al)break}return best}
+function chess(){
+ const G={"k":"♚","q":"♛","r":"♜","b":"♝","n":"♞","p":"♟"};
+ let b=[..."rnbqkbnrpppppppp"].concat(Array(32).fill(""),[..."PPPPPPPPRNBQKBNR"]),sel=-1,busy=false,over=false;
+ ov.innerHTML='<div class="box"><h2>Шахматы с ИИ</h2><div class="note">Ты играешь белыми (снизу). Выигрывает тот, кто съест короля. Рокировки и взятия на проходе нет.</div><div class="bd" id="bd"></div><button class="btn" id="gv">Сдаться</button></div>';
+ const bd=$("bd");
+ function draw(){const tg=sel>=0?gen(b,true).filter(m=>m[0]==sel).map(m=>m[1]):[];
+  bd.innerHTML=b.map((p,i)=>`<div class="sq ${((i>>3)+i)%2?"d":"l"}${i==sel?" s":""}${tg.includes(i)?" t":""}" data-i="${i}"><span class="${p&&isW(p)?"w":"k"}">${p?G[p.toLowerCase()]:""}</span></div>`).join("")}
+ function end(win,msg){over=true;setTimeout(()=>endBox(win,msg),700)}
+ function ai(){const ms=gen(b,false);if(!ms.length){draw();return end(false,"Ничья. Ходов не осталось.")}
+  let bm=ms[0],bv=-1e9;for(const m of ms){const cap=b[m[1]],v=(cap&&cap.toLowerCase()=="k"?1e6:ab(app(b,m),1,-1e9,1e9,false))+Math.random()*6;if(v>bv){bv=v;bm=m}}
+  const cap=b[bm[1]];b=app(b,bm);busy=false;snd("move");draw();
+  if(cap&&cap.toLowerCase()=="k")return end(false,"ИИ съел твоего короля.");
+  if(!gen(b,true).length)end(false,"Ничья. Ходов не осталось.")}
+ bd.onclick=e=>{const s=e.target.closest(".sq");if(!s||busy||over)return;const i=+s.dataset.i,p=b[i];
+  if(p&&isW(p)){sel=i;return draw()}
+  if(sel>=0&&gen(b,true).some(m=>m[0]==sel&&m[1]==i)){const cap=b[i];b=app(b,[sel,i]);sel=-1;snd("move");draw();
+   if(cap&&cap.toLowerCase()=="k")return end(true,"Король ИИ съеден. Ты победил!");
+   busy=true;setTimeout(ai,350)}else{sel=-1;draw()}};
+ $("gv").onclick=()=>{over=true;finish(false)};draw()}
+
+/* вордли */
+const WL="арбуз берег ветер время город гроза дождь земля книга кошка лодка лампа масло мышка озеро птица радио рынок сосна стена столб тропа улица фирма школа герой дрозд завод игрок магия метро народ пирог почта право рубль слива танец тигры удача цветы часть шарик ягода дроны крыло ангар пилот радар мотор полет утята пруды".split(" ");
+function wordle(){
+ const W=WL[Math.random()*WL.length|0],rows=["йцукенгшщзхъ","фывапролджэ","ячсмитьбю"];let gs=[],cur="",done=false,ks={};
+ ov.innerHTML='<div class="box"><h2>Вордли</h2><div class="note">Шесть попыток. Любые пять букв принимаются. Зелёный: буква на месте, жёлтый: есть, но в другом месте.</div><div class="wg" id="wg"></div><div id="kb"></div></div>';
+ $("kb").innerHTML=rows.map((r,i)=>'<div class="kr">'+(i==2?'<button data-k="enter">Ввод</button>':"")+[...r].map(c=>`<button data-k="${c}" id="k${c}">${c}</button>`).join("")+(i==2?'<button data-k="del">⌫</button>':"")+"</div>").join("");
+ function draw(){let h="";for(let r=0;r<6;r++)for(let c=0;c<5;c++){const g=gs[r],ch=g?g.w[c]:r==gs.length?cur[c]||"":"";h+=`<div class="wc ${g?g.c[c]:""}">${ch}</div>`}$("wg").innerHTML=h}
+ function score(w){const c=Array(5).fill("n"),left={};for(let i=0;i<5;i++)if(w[i]==W[i])c[i]="g";else left[W[i]]=(left[W[i]]||0)+1;
+  for(let i=0;i<5;i++)if(c[i]!="g"&&left[w[i]]>0){c[i]="y";left[w[i]]--}return c}
+ $("kb").onclick=e=>{const k=e.target.dataset.k;if(!k||done)return;snd("key");
+  if(k=="del")cur=cur.slice(0,-1);
+  else if(k=="enter"){if(cur.length<5)return;const c=score(cur);gs.push({w:cur,c});
+   [...cur].forEach((ch,i)=>{const o=ks[ch],n=c[i];if(o=="g"||(o=="y"&&n=="n"))return;ks[ch]=n;$("k"+ch).className=n});
+   const win=cur==W;cur="";draw();
+   if(win||gs.length==6){done=true;setTimeout(()=>endBox(win,win?"Верно! Слово: "+W:"Не угадал. Слово было: "+W),900)}return}
+  else if(cur.length<5)cur+=k;draw()};
+ draw()}
+
+/* ---------- запуск ---------- */
+{const away=Math.min((Date.now()-S.t)/1000,offH()*3600),g=cps()*away*offQ();if(away>30&&g>0){earn(g);setTimeout(()=>toast("Пока тебя не было, парк заработал "+m$(g)),300)}}
+function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let last=performance.now();
+setInterval(()=>{const n=performance.now(),dt=(n-last)/1000;last=n;earn(cps()*dt);if(Date.now()>nextEv){nextEv=Date.now()+(150+Math.random()*150)*1000;fire()}upd()},200);
+setInterval(save,5000);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)save();else last=performance.now()});
+addEventListener("pagehide",save);
+buildShop();buildPres();buildFocus();upd();
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script></body></html>
